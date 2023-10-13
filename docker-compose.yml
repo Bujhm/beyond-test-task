@@ -6,7 +6,10 @@ services:
     container_name: "symfony-assessment-apache-php"
     build: ./docker/php-apache
     volumes:
-      - php-apache:/var/www/html
+      - projectname-bashhistory:/commandhistory
+      - type: bind
+        source: ./src
+        target: /var/www/html
     ports:
       - 80:80
 
@@ -31,5 +34,6 @@ services:
       - 8080:8080
 
 volumes:
+  projectname-bashhistory:
   php-apache:
   db:
