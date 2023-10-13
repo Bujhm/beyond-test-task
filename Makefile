@@ -20,6 +20,22 @@ env: ## Setup environment file
 up: ## Starts docker containers
 	docker compose up -d
 
+.PHONY: start
+start: ## Start docker containers
+	docker compose start
+
 .PHONY: stop
 stop: ## Stops docker containers
 	docker compose stop
+
+.PHONY: down
+down: ## Downs docker containers
+	docker compose down
+
+.PHONY: downv
+downv: ## Downs docker containers with volumes
+	docker compose down -v
+
+.PHONY: exec-php-bash
+exec-php-bash: ## Run bash in php docker container
+	docker exec -it symfony-assessment-apache-php bash
