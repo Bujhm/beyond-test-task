@@ -16,8 +16,15 @@ RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhisto
     && echo "$SNIPPET" >> if [ ${HOSTUSERNAME} -ne "root" ] then "/home/${HOSTUSERNAME}/.bashrc" else "/root/.bashrc" fi
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+ENV APACHE_RUN_DIR=/usr/sbin
+ENV APACHE_PID_FILE=/var/run/apache2/apache2.pid
+ENV APACHE_RUN_USER=www-data 
+ENV APACHE_RUN_GROUP=www-data 
+ENV APACHE_LOG_DIR=/var/log/apache2 
+
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN sed -ri -e '174i\FallbackResource /index.php' /etc/apache2/apache2.conf
 
 #INI-Files
 COPY ./opcache.ini "$PHP_INI_DIR/conf.d/docker-php-ext-opcache.ini"
@@ -25,7 +32,7 @@ COPY ./xdebug.ini "$PHP_INI_DIR/conf.d/99-xdebug.ini"
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 #Install Packages
-RUN apt-get -y update && apt-get install -y libicu-dev libzip-dev zip libjpeg-dev libpng-dev libfreetype6-dev
+RUN apt-get -y update && apt-get install -y nano libicu-dev libzip-dev zip libjpeg-dev libpng-dev libfreetype6-dev git
 RUN docker-php-ext-configure intl
 RUN docker-php-ext-configure gd '--with-jpeg' '--with-freetype'
 RUN docker-php-ext-install intl opcache pdo_mysql zip gd
