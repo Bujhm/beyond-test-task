@@ -43,4 +43,9 @@ exec-php-bash: ## Run bash in php docker container
 
 .PHONY: exec-php-bash-root
 exec-php-bash-root: ## Run bash in php docker container
-	docker exec -it -u root symfony-assessment-apache-php bash 
+	docker exec -it -u root symfony-assessment-apache-php bash  
+
+.PHONY: build
+build: ## Run bash in php docker container
+	docker-compose build --parallel
+ 
