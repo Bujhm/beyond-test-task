@@ -38,9 +38,14 @@ downv: ## Downs docker containers with volumes
 	docker compose down -v
 
 .PHONY: exec-php-bash
-exec-php-bash: ## Run bash in php docker container
+exec-php-bash: ## Run bash in php docker container as current user
 	docker exec -it -u ${CURRENT_USER} symfony-assessment-apache-php bash 
 
 .PHONY: exec-php-bash-root
-exec-php-bash-root: ## Run bash in php docker container
-	docker exec -it -u root symfony-assessment-apache-php bash 
+exec-php-bash-root: ## Run bash in php docker container as root
+	docker exec -it -u root symfony-assessment-apache-php bash  
+
+.PHONY: build
+build: ## Build docker container
+	docker-compose build --parallel
+ 

@@ -4,27 +4,27 @@ ARG USER_ID
 ARG GROUP_ID
 ARG HOSTUSERNAME
 
-# RUN groupadd -og ${GROUP_ID} ${HOSTUSERNAME};
-# RUN useradd -l -u ${USER_ID} -g ${HOSTUSERNAME} ${HOSTUSERNAME} 
-# RUN install -d -m 0755 -o ${HOSTUSERNAME} -g ${HOSTUSERNAME} /home/${HOSTUSERNAME}
-
 RUN if [ ${USER_ID:-0} -ne 0 ] && [ ${GROUP_ID:-0} -ne 0 ]; then \
-    # userdel -f ${HOSTUSERNAME} &&\
-    # if getent group ${HOSTUSERNAME} ; then groupdel ${HOSTUSERNAME}; fi &&\
-groupadd -og ${GROUP_ID} ${HOSTUSERNAME} && \
-useradd -l -u ${USER_ID} -g ${GROUP_ID} ${HOSTUSERNAME} && \
-install -d -m 0755 -o ${HOSTUSERNAME} -g ${HOSTUSERNAME} /home/${HOSTUSERNAME} && \
-passwd -d ${HOSTUSERNAME} \
+    groupadd -og ${GROUP_ID} ${HOSTUSERNAME} && \
+    useradd -l -u ${USER_ID} -g ${GROUP_ID} ${HOSTUSERNAME} && \
+    install -d -m 0755 -o ${HOSTUSERNAME} -g ${HOSTUSERNAME} /home/${HOSTUSERNAME} && \
+    passwd -d ${HOSTUSERNAME} \
 ;fi
         
-# USER ${HOSTUSERNAME}
 
 RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
-    && echo "$SNIPPET" >> "/root/.bashrc"
+    && echo "$SNIPPET" >> if [ ${HOSTUSERNAME} -ne "root" ] then "/home/${HOSTUSERNAME}/.bashrc" else "/root/.bashrc" fi
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+ENV APACHE_RUN_DIR=/usr/sbin
+ENV APACHE_PID_FILE=/var/run/apache2/apache2.pid
+ENV APACHE_RUN_USER=www-data 
+ENV APACHE_RUN_GROUP=www-data 
+ENV APACHE_LOG_DIR=/var/log/apache2 
+
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN sed -ri -e '174i\FallbackResource /index.php' /etc/apache2/apache2.conf
 
 #INI-Files
 COPY ./opcache.ini "$PHP_INI_DIR/conf.d/docker-php-ext-opcache.ini"
@@ -32,7 +32,7 @@ COPY ./xdebug.ini "$PHP_INI_DIR/conf.d/99-xdebug.ini"
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 #Install Packages
-RUN apt-get -y update && apt-get install -y libicu-dev libzip-dev zip libjpeg-dev libpng-dev libfreetype6-dev
+RUN apt-get -y update && apt-get install -y nano libicu-dev libzip-dev zip libjpeg-dev libpng-dev libfreetype6-dev git
 RUN docker-php-ext-configure intl
 RUN docker-php-ext-configure gd '--with-jpeg' '--with-freetype'
 RUN docker-php-ext-install intl opcache pdo_mysql zip gd
