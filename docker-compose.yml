@@ -4,11 +4,17 @@ version: "3"
 services:
   php-apache:
     container_name: "symfony-assessment-apache-php"
-    build: ./docker/php-apache
+    build: 
+      context: ./docker/php-apache
+      dockerfile: dockerfile
+      args:
+        USER_ID: ${USER_ID:-0}
+        GROUP_ID: ${GROUP_ID:-0}
+        HOSTUSERNAME: ${HOSTUSERNAME:-root}
     volumes:
       - projectname-bashhistory:/commandhistory
       - type: bind
-        source: ./src
+        source: ./
         target: /var/www/html
     ports:
       - 80:80

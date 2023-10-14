@@ -1,4 +1,5 @@
 .DEFAULT_GOAL := help
+CURRENT_USER := $(shell whoami)
 
 ifndef VERBOSE
 .SILENT:
@@ -38,4 +39,8 @@ downv: ## Downs docker containers with volumes
 
 .PHONY: exec-php-bash
 exec-php-bash: ## Run bash in php docker container
-	docker exec -it symfony-assessment-apache-php bash
+	docker exec -it -u ${CURRENT_USER} symfony-assessment-apache-php bash 
+
+.PHONY: exec-php-bash-root
+exec-php-bash-root: ## Run bash in php docker container
+	docker exec -it -u root symfony-assessment-apache-php bash 

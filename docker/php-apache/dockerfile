@@ -1,5 +1,24 @@
 FROM php:8.2-apache
 
+ARG USER_ID
+ARG GROUP_ID
+ARG HOSTUSERNAME
+
+# RUN groupadd -og ${GROUP_ID} ${HOSTUSERNAME};
+# RUN useradd -l -u ${USER_ID} -g ${HOSTUSERNAME} ${HOSTUSERNAME} 
+# RUN install -d -m 0755 -o ${HOSTUSERNAME} -g ${HOSTUSERNAME} /home/${HOSTUSERNAME}
+
+RUN if [ ${USER_ID:-0} -ne 0 ] && [ ${GROUP_ID:-0} -ne 0 ]; then \
+    # userdel -f ${HOSTUSERNAME} &&\
+    # if getent group ${HOSTUSERNAME} ; then groupdel ${HOSTUSERNAME}; fi &&\
+groupadd -og ${GROUP_ID} ${HOSTUSERNAME} && \
+useradd -l -u ${USER_ID} -g ${GROUP_ID} ${HOSTUSERNAME} && \
+install -d -m 0755 -o ${HOSTUSERNAME} -g ${HOSTUSERNAME} /home/${HOSTUSERNAME} && \
+passwd -d ${HOSTUSERNAME} \
+;fi
+        
+# USER ${HOSTUSERNAME}
+
 RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
     && echo "$SNIPPET" >> "/root/.bashrc"
 
@@ -33,3 +52,5 @@ RUN curl -sS https://get.symfony.com/cli/installer | bash && mv /root/.symfony5/
 
 # Install NVM
 RUN curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+
+USER ${HOSTUSERNAME}
