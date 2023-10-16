@@ -2,14 +2,35 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
+use App\Controller\BookSearchController;
 use App\Repository\BookRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\{Common\Collections\ArrayCollection,
+    Common\Collections\Collection,
+    ORM\Mapping as ORM};
+use ApiPlatform\{Metadata\ApiResource,
+    Metadata\Get,
+    Metadata\Post,
+    Metadata\Put,
+    Metadata\Patch,
+    Metadata\Delete,
+    Metadata\GetCollection};
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
-#[ApiResource]
+#[ApiResource(operations: [
+    new Get(
+        uriTemplate: '/books/search',
+        controller: BookSearchController::class,
+        read: false,
+        name: 'search',
+    ),
+    new Get(),
+    new GetCollection(),
+    new Post(),
+    new Put(),
+    new Patch(),
+    new Delete(),
+])]
 class Book
 {
     #[ORM\Id]
@@ -17,15 +38,39 @@ class Book
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank]
+    #[Assert\NotNull]
+    #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
     #[ORM\ManyToOne(inversedBy: 'books')]
     private ?Publisher $publisher = null;
 
+    #[Assert\NotBlank]
+    #[Assert\NotNull]
+    #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255)]
     private ?string $description = null;
 
+    #[Assert\NotBlank]
+    #[Assert\NotNull]
+    #[Assert\Length(
+        min: 10,
+        max: 13,
+        minMessage: 'ISBN should be 10 digits min',
+        maxMessage: 'ISBN should be 13 digits min'
+    )]
+    #[Assert\Regex(
+        pattern: '/^\d+$/',
+        message: 'ISBN should contain only numbers',
+    ),
+        // TODO: or we can use something like that (but we can only chose one format):
+        //        new Assert\Isbn(
+        //            type: Assert\Isbn::ISBN_13,
+        //            message: 'This value is not valid.',
+        //        ),
+    ]
     #[ORM\Column(length: 13)]
     private ?string $isbn = null;
 
