@@ -4,9 +4,7 @@ namespace App\Entity;
 
 use App\Controller\BookSearchController;
 use App\Repository\BookRepository;
-use Doctrine\{Common\Collections\ArrayCollection,
-    Common\Collections\Collection,
-    ORM\Mapping as ORM};
+use Doctrine\{Common\Collections\ArrayCollection, Common\Collections\Collection, DBAL\Types\Types, ORM\Mapping as ORM};
 use ApiPlatform\{Metadata\ApiResource,
     Metadata\Get,
     Metadata\Post,
@@ -17,6 +15,7 @@ use ApiPlatform\{Metadata\ApiResource,
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
+#[ORM\Index(columns: ['name'], name: 'name_idx', flags: ['fulltext'])]
 #[ApiResource(operations: [
     new Get(
         uriTemplate: '/books/search',
@@ -41,7 +40,7 @@ class Book
     #[Assert\NotBlank]
     #[Assert\NotNull]
     #[Assert\Length(max: 255)]
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT, length: 255)]
     private ?string $name = null;
 
     #[ORM\ManyToOne(inversedBy: 'books')]
