@@ -48,3 +48,7 @@ exec-php-bash-root: ## Run bash in php docker container as root
 .PHONY: build
 build: ## Build docker container
 	docker-compose build --parallel
+
+.PHONY: tests
+tests: ## Build docker container
+	composer run tests
